@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Register - CivicSense</title>
+<link rel="stylesheet" th:href="@{/css/style.css}">
+<style>
+/* ===================== BODY & GLOBAL STYLES ===================== */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: url('/images/background11.avif') no-repeat center center fixed;
+    background-size: cover;
+    margin: 0;
+    padding-top: 60px; 
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; 
+    position: relative;
+    transition: 0.4s;
+}
+body.dark { background:#0f172a; color:white; }
+body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.25);
+    z-index: -1;
+}
+
+/* ===================== NAVBAR ===================== */
+.logo{ display:flex; align-items:center; gap:8px; }
+.logo-icon{
+    width:24px; height:24px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#10b981,#059669);
+    display:flex; align-items:center; justify-content:center;
+    color:white; font-weight:700; font-size:12px;
+    box-shadow:0 0 12px rgba(16,185,129,0.6); position:relative;
+    animation:logoFloat 3s ease-in-out infinite alternate;
+}
+.navbar .logo h2 { color: #111827; }
+.logo-icon::before{
+    content:''; position:absolute; width:36px; height:36px;
+    border-radius:50%;
+    border:2px solid rgba(16,185,129,0.4);
+    animation:rotateRing 6s linear infinite;
+}
+@keyframes rotateRing{from{ transform:rotate(0deg); } to{ transform:rotate(360deg); }}
+@keyframes logoFloat{
+    0%{ transform:translateY(0px); box-shadow:0 0 8px rgba(16,185,129,0.5);}
+    100%{ transform:translateY(-6px); box-shadow:0 0 20px rgba(16,185,129,0.9);}
+}
+.navbar{
+    position:fixed; top:0; width:100%; padding:2px 30px;
+    display:flex; justify-content:space-between; align-items:center;
+    background:rgba(255,255,255,0.7); backdrop-filter:blur(15px);
+    box-shadow:0 5px 20px rgba(0,0,0,0.05); z-index:1000; transition:0.4s;
+}
+.navbar.scrolled{ padding:4px 30px; background:rgba(255,255,255,0.9); box-shadow:0 6px 25px rgba(0,0,0,0.1);}
+.navbar a{ text-decoration:none; margin-left:15px; color:#374151; font-weight:500; transition:.3s; }
+.navbar a:hover{ color:#059669; }
+.btn-nav{ background:linear-gradient(135deg,#10b981,#059669); color:white!important; padding:6px 14px; border-radius:20px; }
+.dark-toggle{ cursor:pointer; margin-left:15px; font-size:16px; }
+
+/* ===================== REGISTER CONTAINER ===================== */
+.main-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+    padding: 20px;
+}
+.container {
+    background: #ffffff;
+    padding: 45px 55px;
+    border-radius: 14px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08),
+                0 0 25px rgba(41,128,185,0.5);
+    width: 370px;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(25px);
+    animation: fadeSlideUp 0.7s ease-out forwards;
+    transition: box-shadow 0.3s ease-in-out;
+    z-index: 10;
+}
+.container:hover {
+    box-shadow: 0 20px 40px rgba(0,0,0,0.08),
+                0 0 40px rgba(41,128,185,0.7);
+}
+@keyframes fadeSlideUp { to { opacity: 1; transform: translateY(0); } }
+
+.logo-text { font-size: 28px; font-weight: 700; color: #2980B9; margin-bottom: 5px; }
+.subtitle { font-size: 14px; color: gray; margin-bottom: 25px; }
+h2 { color: #2980B9; margin-bottom: 20px; }
+
+input[type=text], input[type=email], input[type=password] {
+    width: 100%; padding: 12px; margin: 12px 0; border-radius: 6px; border: 1px solid #ccc; font-size:14px; transition: all 0.3s ease;
+}
+input:focus { outline: none; border-color: #2980B9; box-shadow:0 0 8px rgba(41,128,185,0.25); }
+.password-wrapper { position: relative; width: 100%; }
+.password-wrapper input { padding-right: 40px; }
+.toggle-password { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 16px; color: #777; transition:0.3s; }
+.toggle-password:hover { color: #2980B9; }
+
+.match-message { font-size: 13px; margin-top:-10px; margin-bottom:10px; }
+.match-message.valid { color: green; }
+.match-message.invalid { color: red; }
+
+button {
+    background-color: #2980B9; color: white; padding: 12px; width: 100%; border:none; border-radius:6px; margin-top:15px; font-size:16px; font-weight:600; letter-spacing:0.5px; transition: all 0.3s ease;
+}
+button:hover { background-color:#1f6391; transform:translateY(-3px); box-shadow:0 12px 25px rgba(41,128,185,0.35); }
+button:active { transform:translateY(0); box-shadow:0 6px 12px rgba(41,128,185,0.25); }
+
+.message { color:red; margin-bottom:10px; font-size:14px; animation:fadeIn 0.5s; }
+.success { color:green; margin-bottom:10px; font-size:14px; animation:fadeIn 0.5s; }
+/* ✅ SMS & Email status style */
+.sms-status { color: #059669; margin-bottom:10px; font-size:14px; animation:fadeIn 0.5s; }
+
+p { margin-top:18px; font-size:14px; }
+a { color: #2980B9; text-decoration:none; font-weight:500; transition:0.3s; }
+a:hover { text-decoration:underline; opacity:0.8; }
+
+footer{
+    background:#111827; color:#9ca3af; text-align:center; padding:15px;
+    width:100%;
+    font-size:13px;
+}
+
+@keyframes fadeIn { from {opacity:0;} to{opacity:1;} }
+</style>
+</head>
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<div class="navbar" id="navbar">
+    <div class="logo">
+        <div class="logo-icon">CS</div>
+        <h2>CivicSense</h2>
+    </div>
+    <div>
+        <a href="/">Home</a>
+        <a href="/login">User</a>
+        <a href="/login">Admin</a>
+        <a href="/login">Department</a>
+        <a href="/login">Login</a>
+        <a href="/register" class="btn-nav">Register</a>
+        <span class="dark-toggle" onclick="toggleDark()">🌙</span>
+    </div>
+</div>
+
+<!-- ================= REGISTER FORM ================= -->
+<div class="main-content">
+    <div class="container">
+        <div class="logo-text">CivicSense</div>
+        <div class="subtitle">Smart Civic Governance System</div>
+
+        <h2>Create Account</h2>
+
+        <!-- ✅ Error / Success / SMS / Email messages -->
+        <p th:if="${error}" class="message" th:text="${error}"></p>
+        <p th:if="${success}" class="success" th:text="${success}"></p>
+        <p th:if="${smsStatus}" class="sms-status" th:text="${smsStatus}"></p>
+        <p th:if="${emailStatus}" class="sms-status" th:text="${emailStatus}"></p>
+
+        <form th:action="@{/register}" th:object="${user}" method="post">
+            <input type="text" th:field="*{username}" placeholder="Username" required pattern="[A-Za-z0-9]{3,20}" title="3-20 letters or numbers only" maxlength="20">
+            <input type="email" th:field="*{email}" placeholder="Email" required>
+
+            <div class="password-wrapper">
+                <input type="password" id="password" th:field="*{password}" placeholder="Password" required>
+                <span class="toggle-password" onclick="togglePassword('password')">👁</span>
+            </div>
+
+            <div class="password-wrapper">
+                <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+                <span class="toggle-password" onclick="togglePassword('confirmPassword')">👁</span>
+            </div>
+            <div id="matchMessage" class="match-message"></div>
+
+            <input type="text" th:field="*{phone}" placeholder="Phone Number" required pattern="[0-9]{10}" title="Enter 10 digit phone number" maxlength="10">
+
+            <button type="submit">Register</button>
+        </form>
+
+        <p>Already have an account? <a th:href="@{/login}">Login here</a></p>
+        <p><a th:href="@{/}">⬅ Back to Home</a></p>
+    </div>
+</div>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+    <div class="logo" style="justify-content:center;margin-bottom:8px;">
+        <div class="logo-icon">CS</div>
+        <h2 style="color:white; font-size:16px;">CivicSense</h2>
+    </div>
+    © 2026 CivicSense | Smart Governance System
+</footer>
+
+<script>
+    // ================= SCROLL NAVBAR =================
+    window.addEventListener("scroll",()=>{ document.getElementById("navbar").classList.toggle("scrolled",window.scrollY>50); });
+
+    // ================= DARK MODE =================
+    function toggleDark(){ document.body.classList.toggle("dark"); }
+
+    // ================= PASSWORD TOGGLE =================
+    function togglePassword(fieldId) {
+        const field = document.getElementById(fieldId);
+        field.type = field.type === "password" ? "text" : "password";
+    }
+
+    // ================= LIVE PASSWORD MATCH =================
+    const passwordField = document.getElementById("password");
+    const confirmField = document.getElementById("confirmPassword");
+    const matchMessage = document.getElementById("matchMessage");
+    confirmField.addEventListener('input', () => {
+        if(confirmField.value === passwordField.value){
+            matchMessage.textContent = "Passwords match ✅";
+            matchMessage.className = "match-message valid";
+        } else {
+            matchMessage.textContent = "Passwords do not match ❌";
+            matchMessage.className = "match-message invalid";
+        }
+    });
+</script>
+
+</body>
+</html>

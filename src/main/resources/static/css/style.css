@@ -1,0 +1,312 @@
+/* ==========================
+   Global body & container
+========================== */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f1f3f5;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    color: #212529;
+    transition: background 0.3s, color 0.3s;
+}
+
+body.dark-mode {
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+.container {
+    background: #ffffff;
+    padding: 40px 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    max-width: 1200px;
+    margin: 50px auto;
+    text-align: center;
+    transition: background 0.3s, box-shadow 0.3s;
+}
+
+body.dark-mode .container {
+    background: #1e1e1e;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+}
+
+/* ==========================
+   Headings & paragraphs
+========================== */
+h1, h2 {
+    color: #004085; /* Govt-style deep blue */
+    margin-bottom: 20px;
+}
+
+body.dark-mode h1, body.dark-mode h2 {
+    color: #4da6ff;
+}
+
+p {
+    color: #555555;
+    margin-bottom: 20px;
+}
+
+body.dark-mode p {
+    color: #cfd8dc;
+}
+
+/* ==========================
+   Dashboard Cards
+========================== */
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 25px;
+}
+
+.card {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    text-align: center;
+    color: #212529;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card i {
+    font-size: 2.2rem;
+    color: #004085;
+    margin-bottom: 10px;
+}
+
+.card h2 {
+    font-size: 1.2rem;
+    margin: 10px 0 5px 0;
+}
+
+.card p {
+    color: #495057;
+    margin: 0;
+}
+
+.card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.card-link:hover .card {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.15);
+}
+
+/* ==========================
+   Forms & Inputs
+========================== */
+input, select {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0 15px 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: background 0.3s, border 0.3s;
+}
+
+body.dark-mode input, body.dark-mode select {
+    background-color: #2c2c2c;
+    color: #e0e0e0;
+    border: 1px solid #555;
+}
+
+input:focus, select:focus, button:focus {
+    outline: 2px solid #004085;
+    outline-offset: 2px;
+}
+
+button, .action-btn, .btn-new {
+    padding: 10px 18px;
+    background-color: #2980b9;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+button:hover, .action-btn:hover, .btn-new:hover {
+    background-color: #3498db;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+body.dark-mode button, 
+body.dark-mode .action-btn, 
+body.dark-mode .btn-new {
+    background-color: #1a73e8;
+    color: #ffffff;
+}
+
+body.dark-mode button:hover,
+body.dark-mode .action-btn:hover,
+body.dark-mode .btn-new:hover {
+    background-color: #1565c0;
+}
+
+/* ==========================
+   Status Messages
+========================== */
+p.error, .message.error {
+    color: #e74c3c;
+    background-color: #f8d7da;
+    padding: 8px;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+p.success, .message.success {
+    color: #27ae60;
+    background-color: #d4edda;
+    padding: 8px;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+body.dark-mode .error {
+    background-color: #5a1b1f;
+    color: #f8d7da;
+}
+
+body.dark-mode .success {
+    background-color: #1b5a2f;
+    color: #d4edda;
+}
+
+/* ==========================
+   Tables
+========================== */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+}
+
+th {
+    background-color: #004085;
+    color: #ffffff;
+}
+
+td {
+    background-color: #f4f6f7;
+    color: #333333;
+}
+
+tr:nth-child(even) td {
+    background-color: #e8eced;
+}
+
+tr:hover td {
+    background-color: #d0e3f2;
+    border-left: 3px solid #004085;
+}
+
+body.dark-mode th {
+    background-color: #1a73e8;
+}
+
+body.dark-mode td {
+    background-color: #2c2c2c;
+    color: #e0e0e0;
+}
+
+/* ==========================
+   Status Badges
+========================== */
+.status {
+    font-weight: bold;
+    text-transform: capitalize;
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: #fff;
+}
+
+.status-pending {
+    background-color: #d35400;
+}
+
+.status-in_progress {
+    background-color: #2980b9;
+}
+
+.status-resolved {
+    background-color: #27ae60;
+}
+
+/* ==========================
+   Links & Back buttons
+========================== */
+a {
+    color: #2980b9;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+a.back {
+    display: inline-block;
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+/* ==========================
+   Logout Button
+========================== */
+.logout-form button {
+    background-color: #e74c3c;
+}
+
+.logout-form button:hover {
+    background-color: #c0392b;
+}
+
+/* ==========================
+   Responsive adjustments
+========================== */
+@media (max-width: 768px) {
+    .cards {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+    table, th, td {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 500px) {
+    th, td {
+        padding: 8px;
+        font-size: 13px;
+    }
+    .container {
+        padding: 20px;
+    }
+}

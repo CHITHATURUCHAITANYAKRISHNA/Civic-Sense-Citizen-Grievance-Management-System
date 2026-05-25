@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Department Dashboard - CivicSense</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f1f3f5;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: 0.4s;
+        }
+
+        .page-wrapper {
+            flex: 1;
+            padding-top: 130px;
+        }
+
+        /* ================= NAVBAR ================= */
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 18px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 5px 25px rgba(0,0,0,0.05);
+            z-index: 1000;
+            transition: 0.4s;
+        }
+
+        .navbar.scrolled {
+            padding: 12px 60px;
+            background: rgba(255,255,255,0.95);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg,#10b981,#059669);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            box-shadow: 0 0 20px rgba(16,185,129,0.6);
+            position: relative;
+            animation: logoFloat 3s ease-in-out infinite alternate;
+        }
+
+        .logo-icon::before {
+            content:'';
+            position:absolute;
+            width:52px;
+            height:52px;
+            border-radius:50%;
+            border:2px solid rgba(16,185,129,0.4);
+            animation:rotateRing 6s linear infinite;
+        }
+
+        @keyframes rotateRing {
+            from { transform:rotate(0deg); }
+            to { transform:rotate(360deg); }
+        }
+
+        @keyframes logoFloat {
+            0% {
+                transform:translateY(0px);
+                box-shadow:0 0 15px rgba(16,185,129,0.5);
+            }
+            100% {
+                transform:translateY(-6px);
+                box-shadow:0 0 35px rgba(16,185,129,0.9);
+            }
+        }
+
+        .navbar h2 {
+            font-size: 20px;
+            margin: 0;
+            color: #111827;
+        }
+
+        .navbar a {
+            text-decoration: none;
+            margin-left: 20px;
+            color: #374151;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .navbar a:hover {
+            color: #059669;
+        }
+
+        .btn-nav {
+            background: linear-gradient(135deg,#10b981,#059669);
+            color: white !important;
+            padding: 8px 18px;
+            border-radius: 25px;
+        }
+
+        .dark-toggle {
+            margin-left: 20px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        /* ================= BACK BUTTON ================= */
+
+        .top-actions {
+            max-width: 1200px;
+            margin: 0 auto 15px auto;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .back-dashboard {
+            background: #004085;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .back-dashboard:hover {
+            background: #003366;
+        }
+
+        /* ================= CONTAINER ================= */
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto 60px auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            text-align: center;
+            color: #004085;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th, table td {
+            padding: 12px 10px;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+
+        table th {
+            background-color: #004085;
+            color: white;
+        }
+
+        select, button {
+            padding: 6px 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 0.9rem;
+        }
+
+        button {
+            background-color: #004085;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+        }
+
+        button:hover {
+            background-color: #003366;
+        }
+
+        /* ================= FOOTER ================= */
+
+        footer {
+            background: #111827;
+            color: #9ca3af;
+            padding: 30px;
+            text-align: center;
+            width: 100%;
+        }
+
+        footer .logo {
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        footer h2 {
+            color: white;
+            margin: 0;
+        }
+
+        /* ================= DARK MODE ================= */
+
+        body.dark {
+            background: #0f172a;
+            color: white;
+        }
+
+        body.dark .navbar {
+            background: rgba(15,23,42,0.85);
+        }
+
+        body.dark .container {
+            background: #1e293b;
+            color: white;
+        }
+
+        body.dark footer {
+            background: #0f172a;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar" id="navbar">
+    <div class="logo">
+        <div class="logo-icon">CS</div>
+        <h2>CivicSense</h2>
+    </div>
+    <div>
+        <a href="/">Home</a>
+        <a href="/login">User</a>
+        <a href="/login">Admin</a>
+        <a href="/login">Department</a>
+        <a href="/login">Login</a>
+        <a href="/register" class="btn-nav">Register</a>
+        <span class="dark-toggle" onclick="toggleDark()">🌙</span>
+    </div>
+</div>
+
+<div class="page-wrapper">
+
+    <div class="top-actions">
+        <a href="javascript:history.back()" class="back-dashboard">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="container">
+        <h1>Department Dashboard</h1>
+
+        <div th:if="${issues == null or issues.isEmpty()}">
+            <p>No issues assigned to your department yet.</p>
+        </div>
+
+        <div th:if="${issues != null and !issues.isEmpty()}">
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                    <th>Submitted By</th>
+                    <th>Created At</th>
+                    <th>Location</th>
+                    <th>Images</th>
+                    <th>Videos</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="issue : ${issues}">
+                    <td th:text="${issue.id}"></td>
+                    <td th:text="${issue.title}"></td>
+                    <td th:text="${issue.description}"></td>
+                    <td th:text="${issue.category}"></td>
+                    <td th:text="${issue.status}"></td>
+                    <td th:text="${issue.user.username}"></td>
+                    <td th:text="${#temporals.format(issue.createdAt, 'dd-MM-yyyy HH:mm')}"></td>
+
+                    <td>
+                        <span th:if="${issue.latitude != null and issue.longitude != null}">
+                            <a th:href="@{/department/fullMap(issueId=${issue.id})}">View Map</a>
+                        </span>
+                        <span th:if="${issue.latitude == null or issue.longitude == null}">N/A</span>
+                    </td>
+
+                    <td>
+                        <span th:if="${issue.imagePaths != null}">
+                            <span th:each="img : ${#strings.arraySplit(issue.imagePaths, ',')}">
+                                <a th:href="@{${img}}" target="_blank">View</a><br>
+                            </span>
+                        </span>
+                        <span th:if="${issue.imagePaths == null and issue.imagePath != null}">
+                            <a th:href="@{${issue.imagePath}}" target="_blank">View</a>
+                        </span>
+                        <span th:if="${issue.imagePaths == null and issue.imagePath == null}">
+                            N/A
+                        </span>
+                    </td>
+
+                    <td>
+                        <span th:if="${issue.videoPath != null}">
+                            <a th:href="@{${issue.videoPath}}" target="_blank">View</a>
+                        </span>
+                        <span th:if="${issue.videoPath == null}">N/A</span>
+                    </td>
+
+                    <td>
+                        <span th:if="${issue.status != T(com.civicsense.entity.Status).RESOLVED}">
+                            <form th:action="@{/department/update-status/{id}(id=${issue.id})}" method="post">
+                                <select name="status" required>
+                                    <option value="PENDING">Pending</option>
+                                    <option value="IN_PROGRESS">In Progress</option>
+                                    <option value="RESOLVED">Resolved</option>
+                                </select>
+                                <button type="submit">Update</button>
+                            </form>
+                        </span>
+                        <span th:if="${issue.status == T(com.civicsense.entity.Status).RESOLVED}">
+                            Resolved
+                        </span>
+                    </td>
+
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="logo">
+        <div class="logo-icon">CS</div>
+        <h2>CivicSense</h2>
+    </div>
+    © 2026 CivicSense | Smart Governance System
+</footer>
+
+<script>
+window.addEventListener("scroll",()=>{
+    document.getElementById("navbar")
+        .classList.toggle("scrolled",window.scrollY>50);
+});
+
+function toggleDark(){
+    document.body.classList.toggle("dark");
+}
+</script>
+
+</body>
+</html>

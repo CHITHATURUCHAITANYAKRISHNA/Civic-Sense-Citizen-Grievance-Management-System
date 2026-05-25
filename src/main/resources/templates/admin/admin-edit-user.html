@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit User | CivicSense</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f1f3f5;
+            margin: 0;
+            transition: 0.4s;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 140px auto 60px auto; /* pushed down below navbar */
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+        }
+
+        h1 {
+            text-align: center;
+            color: #004085;
+            margin-bottom: 30px;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input, select {
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #004085;
+            box-shadow: 0 0 5px rgba(0,64,133,0.3);
+        }
+
+        .btn {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #fff;
+        }
+
+        .btn-update {
+            background-color: #17a2b8;
+            margin-bottom: 10px;
+        }
+
+        .btn-update:hover {
+            background-color: #138496;
+        }
+
+        .btn-back {
+            background-color: #6c757d;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-back:hover {
+            background-color: #5a6268;
+            color: #fff;
+        }
+
+        @media(max-width: 480px) {
+            .container {
+                margin: 80px 20px;
+                padding: 30px;
+            }
+        }
+
+        /* ================= NAVBAR ================= */
+        .logo{
+            display:flex;
+            align-items:center;
+            gap:10px;
+        }
+        .logo-icon{
+            width:36px;
+            height:36px;
+            border-radius:50%;
+            background:linear-gradient(135deg,#10b981,#059669);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:white;
+            font-weight:700;
+            font-size:16px;
+            box-shadow:0 0 20px rgba(16,185,129,0.6);
+            position:relative;
+            animation:logoFloat 3s ease-in-out infinite alternate;
+        }
+        .logo-icon::before{
+            content:'';
+            position:absolute;
+            width:52px;
+            height:52px;
+            border-radius:50%;
+            border:2px solid rgba(16,185,129,0.4);
+            animation:rotateRing 6s linear infinite;
+        }
+        @keyframes rotateRing{
+            from{ transform:rotate(0deg); }
+            to{ transform:rotate(360deg); }
+        }
+        @keyframes logoFloat{
+            0%{ transform:translateY(0px); box-shadow:0 0 15px rgba(16,185,129,0.5); }
+            100%{ transform:translateY(-6px); box-shadow:0 0 35px rgba(16,185,129,0.9); }
+        }
+
+        .navbar{
+            position:fixed;
+            top:0;
+            width:100%;
+            padding:2px 60px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            background:rgba(255,255,255,0.7);
+            backdrop-filter:blur(15px);
+            box-shadow:0 5px 25px rgba(0,0,0,0.05);
+            z-index:1000;
+            transition:0.4s;
+        }
+        .navbar.scrolled{
+            padding:5px 60px;
+            background:rgba(255,255,255,0.9);
+            box-shadow:0 8px 30px rgba(0,0,0,0.1);
+        }
+        .navbar a{
+            text-decoration:none;
+            margin-left:20px;
+            color:#374151;
+            font-weight:500;
+            transition:.3s;
+        }
+        .navbar a:hover{
+            color:#059669;
+        }
+        .btn-nav{
+            background:linear-gradient(135deg,#10b981,#059669);
+            color:white!important;
+            padding:8px 18px;
+            border-radius:25px;
+        }
+
+        /* ================= FOOTER ================= */
+        footer{
+            background:#111827;
+            color:#9ca3af;
+            text-align:center;
+            padding:10px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar" id="navbar">
+    <div class="logo">
+        <div class="logo-icon">CS</div>
+        <h2>CivicSense</h2>
+    </div>
+    <div>
+        <a href="/">Home</a>
+        <a href="/login">User</a>
+        <a href="/login">Admin</a>
+        <a href="/login">Department</a>
+        <a href="/login">Login</a>
+        <a href="/register" class="btn-nav">Register</a>
+        <!-- Dark mode toggle removed -->
+    </div>
+</div>
+
+<!-- CONTENT -->
+<div class="container">
+    <h1>Edit User</h1>
+
+    <form th:action="@{'/user/admin/users/edit/' + ${user.id}}" th:object="${user}" method="post">
+        <label for="username">Username:</label>
+        <input type="text" id="username" th:field="*{username}" placeholder="Enter username" required>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" th:field="*{email}" placeholder="Enter email" required>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" th:field="*{password}" placeholder="Leave blank to keep current password">
+
+        <label for="role">Role:</label>
+        <select id="role" th:field="*{role}" required>
+            <option th:value="'ROLE_USER'" th:selected="${user.role == 'ROLE_USER'}">USER</option>
+            <option th:value="'ROLE_ADMIN'" th:selected="${user.role == 'ROLE_ADMIN'}">ADMIN</option>
+            <option th:value="'ROLE_DEPARTMENT'" th:selected="${user.role == 'ROLE_DEPARTMENT'}">DEPARTMENT</option>
+        </select>
+
+        <button type="submit" class="btn btn-update"><i class="fas fa-save"></i> Update User</button>
+    </form>
+
+    <a th:href="@{/admin/users}" class="btn btn-back"><i class="fas fa-arrow-left"></i> Back to Users</a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <div class="logo" style="justify-content:center;margin-bottom:10px;">
+        <div class="logo-icon">CS</div>
+        <h2 style="color:white;">CivicSense</h2>
+    </div>
+    © 2026 CivicSense | Smart Governance System
+</footer>
+
+<script>
+window.addEventListener("scroll",()=>{
+    document.getElementById("navbar").classList.toggle("scrolled",window.scrollY>50);
+});
+</script>
+
+</body>
+</html>

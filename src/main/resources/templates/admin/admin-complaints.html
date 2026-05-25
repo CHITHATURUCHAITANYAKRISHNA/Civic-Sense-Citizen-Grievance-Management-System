@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Complaints</title>
+
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+        body {background-color:#f1f3f5;transition:0.4s;}
+        
+        /* NAVBAR */
+        .logo{display:flex;align-items:center;gap:10px;}
+        .logo-icon{
+            width:36px;height:36px;border-radius:50%;
+            background:linear-gradient(135deg,#10b981,#059669);
+            display:flex;align-items:center;justify-content:center;
+            color:white;font-weight:700;font-size:16px;
+            box-shadow:0 0 20px rgba(16,185,129,0.6);
+            position:relative;
+            animation:logoFloat 3s ease-in-out infinite alternate;
+        }
+        .logo-icon::before{
+            content:'';position:absolute;width:52px;height:52px;
+            border-radius:50%;border:2px solid rgba(16,185,129,0.4);
+            animation:rotateRing 6s linear infinite;
+        }
+        @keyframes rotateRing{from{ transform:rotate(0deg);} to{ transform:rotate(360deg);}}
+        @keyframes logoFloat{0%{transform:translateY(0px);} 100%{transform:translateY(-6px);}}
+        
+        .navbar{
+            position:fixed;top:0;left:0;width:100%;
+            padding:18px 60px;display:flex;justify-content:space-between;align-items:center;
+            background:rgba(255,255,255,0.7);backdrop-filter:blur(15px);
+            box-shadow:0 5px 25px rgba(0,0,0,0.05);z-index:1000;transition:0.4s;
+        }
+        .navbar.scrolled{padding:12px 60px;background:rgba(255,255,255,0.9);box-shadow:0 8px 30px rgba(0,0,0,0.1);}
+        .navbar h2{font-weight:700;color:#111827;margin:0;line-height:1;}
+        .navbar a{text-decoration:none;margin-left:20px;color:#374151;font-weight:500;transition:.3s;}
+        .navbar a:hover{color:#059669;}
+        .btn-nav{background:linear-gradient(135deg,#10b981,#059669);color:white!important;padding:8px 18px;border-radius:25px;}
+        .dark-toggle{cursor:pointer;margin-left:20px;font-size:18px;}
+
+        /* PAGE CONTENT */
+        .container {
+            max-width: 1400px;
+            margin: 140px auto 50px auto;
+            padding: 30px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+        }
+        h1 { color: #004085; font-size:1.8rem; margin-bottom:25px; text-align:center;}
+        a.back {display:inline-block;margin-bottom:20px;color:#004085;font-weight:bold;text-decoration:none;}
+        a.back:hover {text-decoration:underline;}
+        table {width:100%; border-collapse:collapse; border-radius:10px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.05);}
+        th, td {padding:14px 12px; text-align:left; vertical-align:middle;}
+        th {background-color:#004085; color:#fff; font-weight:bold;}
+        tr:nth-child(even) td {background-color:#f9f9f9;}
+        tr:hover td {background-color:#e2e6ea;}
+        td[data-label="Title"]:hover {background-color:#cce5ff; cursor:pointer; font-weight:bold;}
+
+        img.issue-img {
+            width:120px; height:auto; border-radius:8px; border:1px solid #ccc;
+            transition: transform 0.3s ease, box-shadow 0.3s ease; cursor:pointer;
+        }
+        img.issue-img:hover { transform:scale(1.05); box-shadow:0 6px 16px rgba(0,0,0,0.2); }
+
+        .status-pending,.status-in_progress,.status-resolved{
+            display:inline-block;font-weight:bold;padding:6px 12px;border-radius:8px;font-size:0.85rem;text-transform:capitalize;
+        }
+        .status-pending{background-color:#ffc107;color:#212529;}
+        .status-in_progress{background-color:#17a2b8;color:#fff;}
+        .status-resolved{background-color:#28a745;color:#fff;}
+
+        .action-btn{padding:6px 14px;background-color:#004085;color:#fff;border:none;border-radius:6px;font-size:0.85rem;text-decoration:none;cursor:pointer;transition:0.2s;display:inline-flex;align-items:center;gap:5px;}
+        .action-btn:hover{background-color:#003366;}
+
+        /* ✅ Chat Button */
+        .chat-btn{background:#6f42c1;}
+        .chat-btn:hover{background:#5a34a3;}
+
+        .assign-form select{padding:6px 10px;border-radius:5px;border:1px solid #ccc;font-size:0.85rem;}
+        .assign-form button{padding:6px 10px;border:none;border-radius:6px;background-color:#28a745;color:white;cursor:pointer;font-size:0.85rem;transition:0.2s;}
+        .assign-form button:hover{background-color:#218838;}
+
+        .small-map{width:120px;height:80px;border-radius:6px;cursor:pointer;}
+
+        /* MODAL */
+        .modal{display:none;position:fixed;z-index:999;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:rgba(0,0,0,0.6);justify-content:center;align-items:center;}
+        .modal-content{background-color:#fff;padding:20px;border-radius:10px;width:90%;max-width:700px;position:relative;}
+        .close-modal{position:absolute;top:10px;right:15px;font-size:1.5rem;font-weight:bold;cursor:pointer;color:#333;}
+        .large-map{width:100%;height:400px;border-radius:6px;}
+        #zoomFullMap{display:inline-block;margin-top:10px;padding:6px 12px;background-color:#004085;color:#fff;border-radius:6px;text-decoration:none;cursor:pointer;transition:0.2s;}
+        #zoomFullMap:hover{background-color:#003366;}
+
+        @media(max-width:768px){
+            table,thead,tbody,th,td,tr{display:block;}
+            th{position:absolute;top:-9999px;left:-9999px;}
+            tr{margin-bottom:15px;border-bottom:1px solid #dee2e6;}
+            td{padding-left:50%;position:relative;}
+            td::before{position:absolute;top:14px;left:12px;width:45%;padding-right:10px;white-space:nowrap;font-weight:bold;content:attr(data-label);}
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- NAVBAR START -->
+<div class="navbar" id="navbar">
+    <div class="logo">
+        <div class="logo-icon">CS</div>
+        <h2>CivicSense</h2>
+    </div>
+    <div>
+        <a href="/">Home</a>
+        <a href="/login">User</a>
+        <a href="/login">Admin</a>
+        <a href="/login">Department</a>
+        <a href="/login">Login</a>
+        <a href="/register" class="btn-nav">Register</a>
+        <span class="dark-toggle" onclick="toggleDark()">🌙</span>
+    </div>
+</div>
+<!-- NAVBAR END -->
+
+<div class="container">
+    <h1>Complaints <span th:text="'(' + ${statusFilter} + ')'"></span></h1>
+    <a th:href="@{/admin/dashboard}" class="back"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Media</th>
+                <th>Status</th>
+                <th>Department</th>
+                <th>Location</th>
+                <th>Chat</th> <!-- ✅ Added -->
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="complaint : ${complaints}">
+                <td th:text="${complaint.id}" data-label="ID"></td>
+                <td th:text="${complaint.title}" data-label="Title"></td>
+                <td th:text="${complaint.category}" data-label="Category"></td>
+
+                <td data-label="Media">
+                    <div th:if="${complaint.imagePath != null && complaint.imagePath != ''}">
+                        <a th:href="@{${complaint.imagePath}}" target="_blank">
+                            <img th:src="@{${complaint.imagePath}}" class="issue-img" alt="Complaint Image">
+                        </a>
+                    </div>
+                    <div th:if="${complaint.videoPath != null && complaint.videoPath != ''}" style="margin-top:10px;">
+                        <video width="120" height="80" controls style="border-radius:6px;">
+                            <source th:src="@{${complaint.videoPath}}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>
+                    <span th:if="${(complaint.imagePath == null || complaint.imagePath == '') && (complaint.videoPath == null || complaint.videoPath == '')}">
+                        No Image/Video
+                    </span>
+                </td>
+
+                <td data-label="Status">
+                    <span th:class="'status-' + ${complaint.status.toString().toLowerCase()}" th:text="${complaint.status}"></span>
+                </td>
+
+                <td data-label="Department">
+                    <div style="display:flex; gap:50px; flex-wrap:wrap;">
+                        <form th:action="@{'/admin/assign-department/' + ${complaint.id}}" method="post" class="assign-form">
+                            <select name="departmentId" th:disabled="${complaint.status.toString() == 'RESOLVED'}">
+                                <option th:if="${complaint.department == null}" value="" selected>Unassigned</option>
+                                <option th:each="dept : ${departments}" th:value="${dept.id}" th:text="${dept.name}" th:selected="${complaint.department != null}? ${dept.id} == ${complaint.department.id}:false"></option>
+                            </select>
+                            <button type="submit" th:disabled="${complaint.status.toString() == 'RESOLVED'}">
+                                <i class="fas fa-check"></i> Assign
+                            </button>
+                        </form>
+                        <a th:href="@{'/admin/update-status/' + ${complaint.id}}" class="action-btn">
+                            <i class="fas fa-edit"></i> Update
+                        </a>
+                    </div>
+                </td>
+
+                <td data-label="Location">
+                    <div th:if="${complaint.latitude != null && complaint.longitude != null}">
+                        <div class="small-map"
+                             th:id="'map-' + ${complaint.id}"
+                             th:attr="data-lat=${complaint.latitude}, data-lng=${complaint.longitude}, data-id=${complaint.id}">
+                        </div>
+                    </div>
+                    <span th:if="${complaint.latitude == null || complaint.longitude == null}">N/A</span>
+                </td>
+
+                <!-- ✅ Chat Button -->
+                <td data-label="Chat">
+                    <a th:href="@{'/chat/' + ${complaint.id}}"
+                       class="action-btn chat-btn">
+                        <i class="fas fa-comments"></i> Chat
+                    </a>
+                </td>
+            </tr>
+
+            <tr th:if="${#lists.isEmpty(complaints)}">
+                <td colspan="9" style="text-align:center;">No complaints found.</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- (ALL YOUR MAP MODAL + SCRIPTS + FOOTER REMAIN EXACT SAME BELOW — NOT REMOVED) -->
+
+<!-- Modal for large map -->
+<div id="mapModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <div id="largeMap" class="large-map"></div>
+        <p id="coordText" style="margin-top:10px;"></p>
+        <a id="googleMapsLink" href="#" target="_blank" style="color:#004085;font-weight:bold;margin-right:10px;">Open in Google Maps</a>
+        <a id="zoomFullMap" href="#" target="_blank">Zoom Full Map</a>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+    let largeMapInstance = null;
+    let largeMarker = null;
+
+    document.querySelectorAll('.small-map').forEach(el => {
+        const lat = parseFloat(el.getAttribute('data-lat'));
+        const lng = parseFloat(el.getAttribute('data-lng'));
+        const complaintId = parseInt(el.getAttribute('data-id'));
+
+        if(!isNaN(lat) && !isNaN(lng)){
+            if(el._leaflet_map) el._leaflet_map.remove();
+            const smallMap = L.map(el.id,{zoomControl:false,dragging:false,scrollWheelZoom:false,attributionControl:false}).setView([lat,lng],13);
+            el._leaflet_map = smallMap;
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:''}).addTo(smallMap);
+            L.marker([lat,lng]).addTo(smallMap);
+            setTimeout(()=>smallMap.invalidateSize(),200);
+
+            el.addEventListener('click', ()=>{
+                const modal = document.getElementById('mapModal');
+                modal.style.display = 'flex';
+
+                setTimeout(()=>{
+                    if(!largeMapInstance){
+                        largeMapInstance = L.map('largeMap').setView([lat,lng],15);
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:''}).addTo(largeMapInstance);
+                        largeMarker = L.marker([lat,lng]).addTo(largeMapInstance);
+                        largeMarker.bindPopup("Latitude: "+lat+"<br>Longitude: "+lng).openPopup();
+                        largeMapInstance.invalidateSize();
+                    } else {
+                        largeMapInstance.setView([lat,lng],15);
+                        largeMarker.setLatLng([lat,lng]).bindPopup("Latitude: "+lat+"<br>Longitude: "+lng).openPopup();
+                        largeMapInstance.invalidateSize();
+                    }
+                    document.getElementById('coordText').textContent = "Coordinates: "+lat+", "+lng;
+                    document.getElementById('googleMapsLink').href = "https://www.google.com/maps?q="+lat+","+lng;
+                    document.getElementById('zoomFullMap').href = "/admin/full-map/"+complaintId;
+                },100);
+            });
+        }
+    });
+
+    const modal = document.getElementById('mapModal');
+    document.querySelector('.close-modal').onclick = () => { modal.style.display='none'; }
+    window.onclick = (event) => { if(event.target == modal) modal.style.display='none'; }
+});
+</script>
+
+<!-- FOOTER -->
+<footer style="background:#111827;color:#9ca3af;padding:25px;margin-top:50px;display:flex;flex-direction:column;align-items:center;text-align:center;">
+    <div class="logo" style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <div class="logo-icon">CS</div>
+        <h2 style="color:white;margin:0;line-height:1;">CivicSense</h2>
+    </div>
+    © 2026 CivicSense | Smart Governance System
+</footer>
+
+<!-- NAVBAR SCRIPT -->
+<script>
+window.addEventListener("scroll",()=>{document.getElementById("navbar").classList.toggle("scrolled",window.scrollY>50);});
+function toggleDark(){document.body.classList.toggle("dark");}
+</script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Reports</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Pending Reports</h1>
+        <a th:href="@{/dashboard}"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+    </header>
+
+    <p>Total pending reports: <span th:text="${pendingReports}">0</span></p>
+
+    <!-- Optional: Table of Reports -->
+    <table border="1" cellpadding="10" cellspacing="0" style="width:100%; margin-top:20px;">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Report Title</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="report, iterStat : ${reports}">
+            <td th:text="${iterStat.count}">1</td>
+            <td th:text="${report.title}">Report Title</td>
+            <td th:text="${report.status}">Pending</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

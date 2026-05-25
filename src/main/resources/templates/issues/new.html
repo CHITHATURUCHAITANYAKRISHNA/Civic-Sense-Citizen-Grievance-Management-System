@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Report Issue | CivicSense</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f0f2f5; margin: 0; padding-top: 70px; }
+
+        /* ===================== NAVBAR ===================== */
+        .logo{ display:flex; align-items:center; gap:8px; }
+        .logo-icon{
+            width:28px; height:28px;
+            border-radius:50%;
+            background:linear-gradient(135deg,#10b981,#059669);
+            display:flex; align-items:center; justify-content:center;
+            color:white; font-weight:700; font-size:14px;
+            box-shadow:0 0 14px rgba(16,185,129,0.6); position:relative;
+            animation:logoFloat 3s ease-in-out infinite alternate;
+        }
+        .navbar .logo h2 { color: #111827; font-size:20px; }
+
+        .logo-icon::before{
+            content:''; position:absolute; width:40px; height:40px;
+            border-radius:50%;
+            border:2px solid rgba(16,185,129,0.4);
+            animation:rotateRing 6s linear infinite;
+        }
+        @keyframes rotateRing{from{ transform:rotate(0deg); } to{ transform:rotate(360deg); }}
+        @keyframes logoFloat{
+            0%{ transform:translateY(0px); box-shadow:0 0 8px rgba(16,185,129,0.5);}
+            100%{ transform:translateY(-6px); box-shadow:0 0 22px rgba(16,185,129,0.9);}
+        }
+
+        .navbar{
+            position:fixed; top:0; width:100%; height:70px; padding:10px 30px;
+            display:flex; justify-content:space-between; align-items:center;
+            background:rgba(255,255,255,0.75); backdrop-filter:blur(15px);
+            box-shadow:0 6px 22px rgba(0,0,0,0.08); z-index:1000; transition:0.4s;
+        }
+        .navbar.scrolled{ padding:12px 30px; background:rgba(255,255,255,0.95); box-shadow:0 7px 28px rgba(0,0,0,0.12);}
+        .navbar a{ text-decoration:none; margin-left:15px; color:#374151; font-weight:500; transition:.3s; }
+        .navbar a:hover{ color:#059669; }
+        .btn-nav{ background:linear-gradient(135deg,#10b981,#059669); color:white!important; padding:6px 14px; border-radius:20px; }
+        .dark-toggle{ cursor:pointer; margin-left:15px; font-size:16px; }
+
+        /* ===================== FORM CONTAINER ===================== */
+        .container {
+            max-width: 700px;
+            margin: 50px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.08);
+        }
+
+        h1 { text-align: center; margin-bottom: 30px; font-weight: 800; }
+
+        label { font-weight: 600; margin-top: 15px; display: block; }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        button.submit-btn {
+            margin-top: 20px;
+            width: 100%;
+            padding: 12px;
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        button.submit-btn:hover { background: #1e40af; }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 15px;
+            font-weight: 600;
+            color: #2563eb;
+            text-decoration: none;
+            transition: 0.2s;
+        }
+
+        .back-link:hover { color: #1e40af; }
+
+        .image-preview {
+            margin-top: 10px;
+            max-width: 100%;
+            display: none;
+            border-radius: 8px;
+        }
+
+        .media-preview {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .media-preview img,
+        .media-preview video {
+            border-radius: 8px;
+            max-height: 120px;
+        }
+
+        .media-preview video {
+            max-width: 200px;
+        }
+
+        #map {
+            height: 300px;
+            margin-top: 15px;
+            border-radius: 8px;
+        }
+
+        /* Floating Back Button */
+        .floating-back {
+            position: fixed;
+            top: 90px;
+            right: 20px;
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            text-decoration: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            transition: background-color 0.3s;
+            z-index: 1000;
+        }
+
+        .floating-back:hover { background-color: #0056b3; }
+
+        /* ===================== FOOTER ===================== */
+        footer{
+            background:#111827; color:#9ca3af; text-align:center; padding:15px;
+            width:100%;
+            font-size:13px;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<div class="navbar" id="navbar">
+    <div class="logo">
+        <div class="logo-icon">CS</div>
+        <h2>CivicSense</h2>
+    </div>
+    <div>
+        <a href="/">Home</a>
+        <a href="/login">User</a>
+        <a href="/login">Admin</a>
+        <a href="/login">Department</a>
+        <a href="/login">Login</a>
+        <a href="/register" class="btn-nav">Register</a>
+        <span class="dark-toggle" onclick="toggleDark()">🌙</span>
+    </div>
+</div>
+
+<!-- Floating Back to Dashboard Button -->
+<a th:href="@{/user/dashboard}" class="floating-back">← Back to Dashboard</a>
+
+<div class="container">
+    <h1>Report an Issue</h1>
+
+    <form th:action="@{/issues/save}" th:object="${issue}" method="post" enctype="multipart/form-data">
+
+        <label>Title</label>
+        <input type="text" th:field="*{title}" required>
+
+        <label>Description</label>
+        <textarea th:field="*{description}" rows="5" required></textarea>
+
+        <label>Category</label>
+        <select th:field="*{category}" required>
+            <option value="" disabled selected>Select Category</option>
+            <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}"></option>
+        </select>
+
+        <label>Upload Image (Optional)</label>
+        <input type="file" name="imageFile" accept="image/*" id="imageFileInput">
+        <img id="imagePreview" class="image-preview">
+
+        <label>Upload Additional Images / Videos (Optional)</label>
+        <input type="file" name="mediaFiles" accept="image/*,video/*" id="mediaFilesInput" multiple>
+        <div id="mediaPreview" class="media-preview"></div>
+
+        <label>Location (Click on map to select)</label>
+        <div id="map"></div>
+        <input type="hidden" th:field="*{latitude}" id="latitude">
+        <input type="hidden" th:field="*{longitude}" id="longitude">
+
+        <button type="submit" class="submit-btn">Submit Issue</button>
+    </form>
+</div>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+    <div class="logo" style="justify-content:center;margin-bottom:8px;">
+        <div class="logo-icon">CS</div>
+        <h2 style="color:white; font-size:16px;">CivicSense</h2>
+    </div>
+    © 2026 CivicSense | Smart Governance System
+</footer>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    // ================= SCROLL NAVBAR =================
+    window.addEventListener("scroll",()=>{ document.getElementById("navbar").classList.toggle("scrolled",window.scrollY>50); });
+
+    // ================= DARK MODE =================
+    function toggleDark(){ document.body.classList.toggle("dark"); }
+
+    // =========================
+    // Single Image Preview
+    // =========================
+    const input = document.getElementById('imageFileInput');
+    const preview = document.getElementById('imagePreview');
+    input.addEventListener('change', () => {
+        const file = input.files[0];
+        if (!file) { preview.style.display = 'none'; return; }
+        const reader = new FileReader();
+        reader.onload = e => { preview.src = e.target.result; preview.style.display = 'block'; };
+        reader.readAsDataURL(file);
+    });
+
+    // =========================
+    // Multiple Media Preview
+    // =========================
+    const mediaInput = document.getElementById('mediaFilesInput');
+    const mediaPreview = document.getElementById('mediaPreview');
+    mediaInput.addEventListener('change', () => {
+        mediaPreview.innerHTML = '';
+        const files = mediaInput.files;
+        Array.from(files).forEach(file => {
+            const type = file.type.split('/')[0];
+            const reader = new FileReader();
+            reader.onload = e => {
+                if(type==='image'){
+                    const img = document.createElement('img'); img.src=e.target.result;
+                    img.style.maxWidth='120px'; img.style.maxHeight='120px';
+                    mediaPreview.appendChild(img);
+                } else if(type==='video'){
+                    const video = document.createElement('video'); video.src=e.target.result;
+                    video.controls=true; video.style.maxWidth='200px'; video.style.maxHeight='120px';
+                    mediaPreview.appendChild(video);
+                }
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+
+    // =========================
+    // Leaflet Map
+    // =========================
+    var map = L.map('map').setView([17.3850, 78.4867], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'Map data © OpenStreetMap contributors' }).addTo(map);
+    var marker;
+    map.on('click', function(e){
+        var lat = e.latlng.lat.toFixed(6);
+        var lng = e.latlng.lng.toFixed(6);
+        if(marker) map.removeLayer(marker);
+        marker = L.marker([lat,lng]).addTo(map);
+        document.getElementById('latitude').value = lat;
+        document.getElementById('longitude').value = lng;
+    });
+</script>
+
+</body>
+</html>

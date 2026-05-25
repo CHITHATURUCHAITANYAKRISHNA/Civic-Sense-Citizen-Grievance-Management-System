@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Admin - Users | CivicSense</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+    scroll-behavior:smooth;
+}
+
+body{
+    background:#f4f6f9;
+    overflow-x:hidden;
+    transition:0.4s;
+}
+
+/* ================= NAVBAR ================= */
+.logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+.logo-icon{
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#10b981,#059669);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:white;
+    font-weight:700;
+    font-size:16px;
+    box-shadow:0 0 20px rgba(16,185,129,0.6);
+    position:relative;
+    animation:logoFloat 3s ease-in-out infinite alternate;
+}
+.logo-icon::before{
+    content:'';
+    position:absolute;
+    width:52px;
+    height:52px;
+    border-radius:50%;
+    border:2px solid rgba(16,185,129,0.4);
+    animation:rotateRing 6s linear infinite;
+}
+@keyframes rotateRing{
+    from{ transform:rotate(0deg); }
+    to{ transform:rotate(360deg); }
+}
+@keyframes logoFloat{
+    0%{ transform:translateY(0px); box-shadow:0 0 15px rgba(16,185,129,0.5); }
+    100%{ transform:translateY(-6px); box-shadow:0 0 35px rgba(16,185,129,0.9); }
+}
+
+.navbar{
+    position:fixed;
+    top:0;
+    width:100%;
+    padding:18px 60px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:rgba(255,255,255,0.7);
+    backdrop-filter:blur(15px);
+    box-shadow:0 5px 25px rgba(0,0,0,0.05);
+    z-index:1000;
+    transition:0.4s;
+}
+.navbar.scrolled{
+    padding:12px 60px;
+    background:rgba(255,255,255,0.9);
+    box-shadow:0 8px 30px rgba(0,0,0,0.1);
+}
+.navbar a{
+    text-decoration:none;
+    margin-left:20px;
+    color:#374151;
+    font-weight:500;
+    transition:.3s;
+}
+.navbar a:hover{
+    color:#059669;
+}
+.btn-nav{
+    background:linear-gradient(135deg,#10b981,#059669);
+    color:white!important;
+    padding:8px 18px;
+    border-radius:25px;
+}
+
+/* ================= ADMIN USERS TABLE ================= */
+.container {
+    max-width: 1000px;
+    margin: 120px auto 60px auto; /* content starts below navbar */
+    background: #ffffff;
+    padding: 35px;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+h1 {
+    color: #004085;
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+a.back {
+    display: inline-block;
+    margin-bottom: 20px;
+    color: #004085;
+    font-weight: bold;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+a.back:hover {
+    text-decoration: underline;
+    color: #003366;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    font-size: 0.95rem;
+}
+
+th {
+    background-color: #004085;
+    color: #ffffff;
+}
+
+tr:nth-child(even) td {
+    background-color: #f9f9f9;
+}
+
+tr:hover td {
+    background-color: #e9ecef;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    transition: 0.2s;
+}
+
+.edit-btn {
+    background-color: #17a2b8;
+}
+
+.edit-btn:hover {
+    background-color: #138496;
+}
+
+.delete-btn {
+    background-color: #dc3545;
+}
+
+.delete-btn:hover {
+    background-color: #b02a37;
+}
+
+/* Responsive Table */
+@media(max-width: 768px) {
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+
+    th {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+
+    tr {
+        margin-bottom: 15px;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    td {
+        padding-left: 50%;
+        position: relative;
+    }
+
+    td::before {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        width: 45%;
+        font-weight: bold;
+        white-space: nowrap;
+        content: attr(data-label);
+    }
+
+    .action-buttons {
+        justify-content: flex-start;
+    }
+}
+
+footer{
+    background:#111827;
+    color:#9ca3af;
+    text-align:center;
+    padding:25px;
+}
+</style>
+</head>
+
+<body>
+<!-- NAVBAR -->
+<div class="navbar" id="navbar">
+    <div class="logo">
+        <div class="logo-icon">CS</div>
+        <h2>CivicSense</h2>
+    </div>
+    <div>
+        <a href="/">Home</a>
+        <a href="/login">User</a>
+        <a href="/login">Admin</a>
+        <a href="/login">Department</a>
+        <a href="/login">Login</a>
+        <a href="/register" class="btn-nav">Register</a>
+        <!-- Dark mode toggle removed -->
+    </div>
+</div>
+
+<!-- CONTENT -->
+<div class="container">
+    <h1>All Users</h1>
+    <a th:href="@{/admin/dashboard}" class="back"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="user, iterStat : ${users}">
+                <td th:text="${iterStat.count}" data-label="#">1</td>
+                <td th:text="${user.username}" data-label="Username">JohnDoe</td>
+                <td th:text="${user.email}" data-label="Email">john@example.com</td>
+                <td th:text="${user.role}" data-label="Role">USER</td>
+                <td data-label="Actions" class="action-buttons">
+                    <button th:onclick="'window.location.href=\'/user/admin/users/edit/' + ${user.id} + '\';'" class="action-btn edit-btn">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button th:onclick="'if(confirm(\'Are you sure you want to delete this user?\')) window.location.href=\'/user/admin/users/delete/' + ${user.id} + '\';'" class="action-btn delete-btn">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <div class="logo" style="justify-content:center;margin-bottom:10px;">
+        <div class="logo-icon">CS</div>
+        <h2 style="color:white;">CivicSense</h2>
+    </div>
+    © 2026 CivicSense | Smart Governance System
+</footer>
+
+<script>
+window.addEventListener("scroll",()=>{
+    document.getElementById("navbar").classList.toggle("scrolled",window.scrollY>50);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Issue Location - Department</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet"
+          href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            z-index: 1000;
+            background-color: #004085;
+            color: white;
+            padding: 8px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back-btn:hover {
+            background-color: #003366;
+        }
+    </style>
+</head>
+<body>
+
+<a th:href="@{/department/dashboard}" class="back-btn">
+    ← Back
+</a>
+
+<div id="map"></div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<!-- ✅ SAFE Thymeleaf JavaScript -->
+<script th:inline="javascript">
+/*<![CDATA[*/
+
+    // Safe variable injection (NO syntax errors)
+    var lat = /*[[${lat}]]*/ 0;
+    var lng = /*[[${lng}]]*/ 0;
+
+    var map = L.map('map').setView([lat, lng], 16);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Only show marker if valid coordinates exist
+    if (lat !== 0 && lng !== 0) {
+        L.marker([lat, lng]).addTo(map)
+            .bindPopup('<b>Issue Location</b>')
+            .openPopup();
+    }
+
+/*]]>*/
+</script>
+
+</body>
+</html>

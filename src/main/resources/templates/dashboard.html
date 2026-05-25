@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - CivicSense</title>
+
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background:#f4f6f8;
+            margin:0;
+            padding:0;
+            color:#333;
+            transition: background 0.3s, color 0.3s;
+        }
+        body.dark-mode { background:#121212; color:#fff; }
+
+        .container {
+            max-width:1100px;
+            margin:50px auto;
+            padding:30px;
+            background:#fff;
+            border-radius:12px;
+            box-shadow:0 10px 25px rgba(0,0,0,0.1);
+        }
+        body.dark-mode .container { background:#1e1e1e; }
+
+        h2 {
+            text-align:center;
+            color:#2980B9;
+            margin-bottom:20px;
+        }
+
+        /* ================= ADMIN SCROLLABLE CARDS ================= */
+
+        .cards-wrapper {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .cards-container {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 10px;
+        }
+
+        .cards-grid {
+            display: flex;
+            gap: 20px;
+            min-width: 600px;
+            flex-wrap: nowrap;
+        }
+
+        .card {
+            flex: 0 0 180px;
+            padding:20px;
+            border-radius:10px;
+            font-weight:bold;
+            text-align:center;
+            color:white;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            transition:0.3s;
+            text-decoration:none;
+        }
+
+        .card i {
+            font-size:2rem;
+            margin-bottom:10px;
+        }
+
+        .card:hover { opacity:0.9; }
+
+        .card-total { background:#2980B9; }
+        .card-pending { background:#e67e22; }
+        .card-alerts { background:#e74c3c; }
+        .card-sessions { background:#16a085; }
+        .card-view { background:#8e44ad; }
+        .card-create { background:#27ae60; }
+
+        /* Scroll buttons */
+        .scroll-btn {
+            position:absolute;
+            top:50%;
+            transform:translateY(-50%);
+            background:rgba(0,0,0,0.5);
+            color:#fff;
+            border:none;
+            padding:10px;
+            border-radius:50%;
+            cursor:pointer;
+            z-index:10;
+            display:none;
+        }
+
+        .scroll-left { left:-15px; }
+        .scroll-right { right:-15px; }
+
+        @media (max-width:900px) {
+            .scroll-btn { display:block; }
+            .cards-grid { min-width:500px; }
+        }
+
+        @media (min-width:901px) {
+            .cards-container { overflow-x:visible; }
+            .cards-grid { flex-wrap:wrap; min-width:0; }
+        }
+
+        /* ================= USER CARDS ================= */
+
+        .user-cards {
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+            gap:25px;
+            margin-bottom:30px;
+        }
+
+        .user-card {
+            background:#fff;
+            padding:25px;
+            border-radius:15px;
+            box-shadow:0 10px 20px rgba(0,0,0,0.15);
+            text-align:center;
+            text-decoration:none;
+            color:inherit;
+            transition:0.3s;
+        }
+
+        .user-card:hover {
+            transform:translateY(-8px);
+            box-shadow:0 15px 25px rgba(0,0,0,0.25);
+        }
+
+        body.dark-mode .user-card { background:#1e1e1e; }
+
+        .user-card i {
+            font-size:2.5rem;
+            color:#2980B9;
+            margin-bottom:15px;
+        }
+
+        body.dark-mode .user-card i { color:#4da6ff; }
+
+        /* ================= TABLE ================= */
+
+        .table-container { overflow-x:auto; margin-top:20px; }
+
+        table {
+            width:100%;
+            border-collapse:collapse;
+        }
+
+        th, td {
+            padding:12px 15px;
+            text-align:left;
+        }
+
+        th {
+            background:#2980B9;
+            color:white;
+        }
+
+        td { background:#f4f6f7; }
+
+        tr:nth-child(even) td { background:#e8eced; }
+
+        tr:hover td { background:#d0e3f2; }
+
+        body.dark-mode td,
+        body.dark-mode th { color:#fff; }
+
+        body.dark-mode td { background:#2a2a2a; }
+
+        /* ================= LOGOUT ================= */
+
+        .logout-form {
+            margin-top:25px;
+            text-align:center;
+        }
+
+        .logout-form button {
+            padding:10px 25px;
+            background:#e74c3c;
+            color:#fff;
+            border:none;
+            border-radius:6px;
+            font-size:16px;
+            cursor:pointer;
+        }
+
+        .logout-form button:hover { background:#c0392b; }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>Welcome, <span th:text="${username}">User</span> 👋</h2>
+
+    <!-- ADMIN CARDS -->
+    <div class="cards-wrapper" th:if="${isAdmin}">
+        <button class="scroll-btn scroll-left"><i class="fas fa-chevron-left"></i></button>
+
+        <div class="cards-container">
+            <div class="cards-grid">
+
+                <div class="card card-total">
+                    <i class="fas fa-users"></i>
+                    <div>Total Users</div>
+                    <div th:text="${stats['Total Users']}">0</div>
+                </div>
+
+                <div class="card card-pending">
+                    <i class="fas fa-clipboard-list"></i>
+                    <div>Pending Reports</div>
+                    <div th:text="${stats['Pending Reports']}">0</div>
+                </div>
+
+                <div class="card card-alerts">
+                    <i class="fas fa-bell"></i>
+                    <div>System Alerts</div>
+                    <div th:text="${stats['System Alerts']}">0</div>
+                </div>
+
+                <div class="card card-sessions">
+                    <i class="fas fa-chart-line"></i>
+                    <div>Active Sessions</div>
+                    <div th:text="${stats['Active Sessions']}">0</div>
+                </div>
+
+                <a th:href="@{/issues}" class="card card-view">
+                    <i class="fas fa-eye"></i>
+                    <div>View Issues</div>
+                </a>
+
+                <a th:href="@{/issues/new}" class="card card-create">
+                    <i class="fas fa-plus"></i>
+                    <div>Create Issue</div>
+                </a>
+
+            </div>
+        </div>
+
+        <button class="scroll-btn scroll-right"><i class="fas fa-chevron-right"></i></button>
+    </div>
+
+    <!-- USERS TABLE -->
+    <div class="table-container" th:if="${isAdmin}">
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="user : ${users}">
+                <td th:text="${user.id}">1</td>
+                <td th:text="${user.username}">username</td>
+                <td th:text="${user.email}">email</td>
+                <td th:text="${user.role}">USER</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- USER DASHBOARD -->
+    <div class="user-cards" th:if="${!isAdmin}">
+        <a th:href="@{/profile}" class="user-card">
+            <i class="fas fa-user"></i>
+            <h3>Profile</h3>
+            <p>View and edit your profile</p>
+        </a>
+
+        <a th:href="@{/activities}" class="user-card">
+            <i class="fas fa-tasks"></i>
+            <h3>My Activities</h3>
+            <p th:text="${activitiesCount ?: 0} + ' activities completed'"></p>
+        </a>
+
+        <a th:href="@{/notifications}" class="user-card">
+            <i class="fas fa-bell"></i>
+            <h3>Notifications</h3>
+            <p th:text="${notificationsCount ?: 0} + ' new notifications'"></p>
+        </a>
+    </div>
+
+    <form th:action="@{/logout}" method="post" class="logout-form">
+        <button type="submit">Logout</button>
+    </form>
+</div>
+
+<script>
+    /* Dark mode */
+    const darkBtn = document.createElement('button');
+    darkBtn.innerText = 'Toggle Dark Mode';
+    Object.assign(darkBtn.style,{
+        position:'fixed',bottom:'20px',right:'20px',
+        padding:'10px',background:'#2980B9',color:'#fff',
+        border:'none',borderRadius:'5px',cursor:'pointer'
+    });
+    document.body.appendChild(darkBtn);
+    darkBtn.onclick = () => document.body.classList.toggle('dark-mode');
+
+    /* Scroll buttons (safe) */
+    const container = document.querySelector('.cards-container');
+    const leftBtn = document.querySelector('.scroll-left');
+    const rightBtn = document.querySelector('.scroll-right');
+
+    if(container && leftBtn && rightBtn){
+        leftBtn.onclick = () => container.scrollBy({left:-200,behavior:'smooth'});
+        rightBtn.onclick = () => container.scrollBy({left:200,behavior:'smooth'});
+    }
+</script>
+
+</body>
+</html>

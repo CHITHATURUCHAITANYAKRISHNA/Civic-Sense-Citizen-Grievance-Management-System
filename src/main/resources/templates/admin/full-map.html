@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Complaint Full Map</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px; /* moved to right side */
+            z-index: 1000;
+            background-color: #004085;
+            color: white;
+            padding: 8px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .back-btn:hover {
+            background-color: #003366;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Back button on right -->
+<a th:href="@{/admin/complaints}" class="back-btn">
+    <i class="fas fa-arrow-left"></i> Back
+</a>
+
+<!-- Map container -->
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script th:inline="javascript">
+/*<![CDATA[*/
+
+    // Safely get values from Thymeleaf
+    var lat = /*[[${lat}]]*/ 0;
+    var lng = /*[[${lng}]]*/ 0;
+
+    lat = parseFloat(lat);
+    lng = parseFloat(lng);
+
+    if (isNaN(lat) || isNaN(lng)) {
+        lat = 0;
+        lng = 0;
+    }
+
+    // Create Leaflet map
+    var map = L.map('map').setView([lat, lng], 17);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Add marker
+    L.marker([lat, lng]).addTo(map)
+        .bindPopup(
+            "<b>Complaint Location</b><br>" +
+            "Latitude: " + lat + "<br>" +
+            "Longitude: " + lng
+        )
+        .openPopup();
+
+/*]]>*/
+</script>
+
+</body>
+</html>

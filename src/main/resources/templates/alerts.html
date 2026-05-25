@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - System Alerts</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>System Alerts</h1>
+        <a th:href="@{/dashboard}"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+    </header>
+
+    <p>Total critical alerts: <span th:text="${systemAlerts}">0</span></p>
+
+    <!-- Optional: Table of Alerts -->
+    <table border="1" cellpadding="10" cellspacing="0" style="width:100%; margin-top:20px;">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Alert Message</th>
+            <th>Date</th>
+            <th>Severity</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="alert, iterStat : ${alerts}">
+            <td th:text="${iterStat.count}">1</td>
+            <td th:text="${alert.message}">Alert message</td>
+            <td th:text="${alert.date}">2026-01-27</td>
+            <td th:text="${alert.severity}">High</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

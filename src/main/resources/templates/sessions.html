@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Active Sessions</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Active Sessions</h1>
+        <a th:href="@{/dashboard}"><i class="fas fa-arrow-left"></i> Back to Dashboard</a>
+    </header>
+
+    <p>Currently online users: <span th:text="${activeSessions}">0</span></p>
+</div>
+</body>
+</html>
